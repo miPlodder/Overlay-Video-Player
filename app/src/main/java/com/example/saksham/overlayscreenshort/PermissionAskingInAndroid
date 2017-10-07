@@ -1,0 +1,30 @@
+
+                int result = ContextCompat.checkSelfPermission(MainActivity.this,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
+                Log.d(TAG, "onClick: " + result);
+                Log.d(TAG, "onClick: " + PackageManager.PERMISSION_GRANTED + "," + PackageManager.PERMISSION_DENIED);
+                Toast.makeText(MainActivity.this, "Requesting Permission", Toast.LENGTH_SHORT).show();
+                ActivityCompat.requestPermissions(MainActivity.this,
+                        new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                        007);
+
+
+    //this method is called after permission dialogs are GONE
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode) {
+
+            case 007:
+
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(this, "Granted", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, "Denied", Toast.LENGTH_SHORT).show();
+                }
+
+                break;
+        }
+    }
