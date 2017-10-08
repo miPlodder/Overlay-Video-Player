@@ -27,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
     public static final int OVERLAY_CODE = 1222;
     public static final int STORAGE_CODE = 34;
     ArrayList<Uri> videoList = new ArrayList<Uri>();
+    Intent serviceIntent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,27 +100,36 @@ public class MainActivity extends AppCompatActivity {
 
             case GET_VIDEO_URL_CODE:
 
-                if (data.getData() != null) {
-                    Log.d(TAG, "data " + data.getData());
-                } else {
-                    //hack for mi, i guess to get external storage video link
-                    ClipData mClipData = data.getClipData();
+                if (data != null) {
+                    if (data.getData() != null) {
+                        Log.d(TAG, "data " + data.getData());
+                    } else {
+                        //hack for mi, i guess to get external storage video link
+                        ClipData mClipData = data.getClipData();
 
-                    for (int i = 0; i < mClipData.getItemCount(); i++) {
+                        for (int i = 0; i < mClipData.getItemCount(); i++) {
 
-                        ClipData.Item item = mClipData.getItemAt(i);
-                        Uri uri = item.getUri();
-                        videoList.add(uri);
+                            ClipData.Item item = mClipData.getItemAt(i);
+                            Uri uri = item.getUri();
+                            videoList.add(uri);
 
+                        }
                     }
+
+                    if (serviceIntent != null) {
+
+                        stopService(serviceIntent);
+                    }
+                    serviceIntent = new Intent(
+                            MainActivity.this,
+                            FloatService.class
+                    );
+                    serviceIntent.putExtra("videoList", videoList);
+                    startService(serviceIntent);
+                    break;
                 }
-                Intent serviceIntent = new Intent(
-                        MainActivity.this,
-                        FloatService.class
-                );
-                serviceIntent.putExtra("videoList", videoList);
-                startService(serviceIntent);
-                break;
+
+
         }
     }
 

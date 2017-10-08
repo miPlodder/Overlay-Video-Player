@@ -7,6 +7,7 @@ import android.graphics.PixelFormat;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.IBinder;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -89,7 +90,7 @@ public class FloatService extends Service implements View.OnClickListener {
         wParams.gravity = Gravity.CENTER;
 
         if (!isFirstView) {
-            Toast.makeText(this, "removing", Toast.LENGTH_SHORT).show();
+
             isFirstView = false;
             windowManager.removeView(view);
         }
@@ -142,13 +143,18 @@ public class FloatService extends Service implements View.OnClickListener {
             //closing the service on clicking "X"
             case R.id.ibtnClose:
 
-                windowManager.removeView(linearLayout);
                 stopSelf();
                 break;
         }
 
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.d(TAG, "onDestroy: inside service");
+        windowManager.removeView(view);
+    }
 
     @Override
     public IBinder onBind(Intent intent) {
