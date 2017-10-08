@@ -2,23 +2,25 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/ll"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:layout_height="match_parent">
 
-    <ImageButton
-        android:id="@+id/ibtnClose"
-        android:layout_gravity="right"
-        android:background="@drawable/imagebutton_stroke_border"
-        android:src="@drawable/ic_close"
+    <FrameLayout
         android:layout_width="wrap_content"
-        android:layout_marginBottom="10dp"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content">
 
-    <VideoView
-        android:id="@+id/vvVideo"
-        android:layout_gravity="center"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginBottom="10dp"/>
+        <VideoView
+            android:id="@+id/vvVideo"
+            android:layout_width="250dp"
+            android:layout_height="150dp"
+            android:backgroundTint="#FFF"
+            android:layout_gravity="center" />
 
+        <ImageButton
+            android:id="@+id/ibtnClose"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:background="@drawable/imagebutton_stroke_border"
+            android:src="@drawable/ic_close" />
+    </FrameLayout>
 </LinearLayout>

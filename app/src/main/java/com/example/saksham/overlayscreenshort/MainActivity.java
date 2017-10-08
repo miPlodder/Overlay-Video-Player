@@ -1,9 +1,7 @@
 package com.example.saksham.overlayscreenshort;
 
 import android.Manifest;
-import android.app.Activity;
-import android.content.Context;
-import android.content.DialogInterface;
+import android.content.ClipData;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -11,18 +9,14 @@ import android.os.Build;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.Toast;
 
-import java.security.Permission;
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -32,6 +26,7 @@ public class MainActivity extends AppCompatActivity {
     public static final int GET_VIDEO_URL_CODE = 1221;
     public static final int OVERLAY_CODE = 1222;
     public static final int STORAGE_CODE = 34;
+    ArrayList<Uri> videoList = new ArrayList<Uri>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,18 +43,17 @@ public class MainActivity extends AppCompatActivity {
 
                 askingPermissionForOverlayScreen();
 
-                Intent mediaChoser = new Intent();//Intent.ACTION_GET_CONTENT);
-
+                Intent mediaChoser = new Intent();
                 mediaChoser.setAction(Intent.ACTION_GET_CONTENT);
                 mediaChoser.setType("video/*");
 
-                /*if (Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN_MR2)
+                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN_MR2)
                     mediaChoser.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
                 else
-                    Toast.makeText(MainActivity.this, "ELSE", Toast.LENGTH_SHORT).show();*/
+                    Toast.makeText(MainActivity.this, "ELSE", Toast.LENGTH_SHORT).show();
 
-                startActivityForResult(mediaChoser,GET_VIDEO_URL_CODE);
-                //startActivityForResult(Intent.createChooser(mediaChoser, "Select Videos"), GET_VIDEO_URL_CODE);
+                //startActivityForResult(mediaChoser,GET_VIDEO_URL_CODE);
+                startActivityForResult(Intent.createChooser(mediaChoser, "Select Videos"), GET_VIDEO_URL_CODE);
 
             }
         });
@@ -105,17 +99,27 @@ public class MainActivity extends AppCompatActivity {
 
             case GET_VIDEO_URL_CODE:
 
-                Log.d(TAG, "data " + data.getData());
-                Log.d(TAG, "type " + data.getType());
+                if (data.getData() != null) {
+                    Log.d(TAG, "data " + data.getData());
+                } else {
+                    //hack for mi, i guess to get external storage video link
+                    ClipData mClipData = data.getClipData();
+
+                    for (int i = 0; i < mClipData.getItemCount(); i++) {
+
+                        ClipData.Item item = mClipData.getItemAt(i);
+                        Uri uri = item.getUri();
+                        videoList.add(uri);
+
+                    }
+                }
                 Intent serviceIntent = new Intent(
                         MainActivity.this,
                         FloatService.class
                 );
-                serviceIntent.putExtra("videoURI", data.getDataString());
+                serviceIntent.putExtra("videoList", videoList);
                 startService(serviceIntent);
                 break;
-
-
         }
     }
 
