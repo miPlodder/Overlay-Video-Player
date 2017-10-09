@@ -4,18 +4,31 @@ import android.Manifest;
 import android.content.ClipData;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.media.MediaMetadataRetriever;
+import android.media.MediaPlayer;
+import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Build;
+import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.media.MediaMetadataCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import org.w3c.dom.Text;
+
+import java.io.File;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
@@ -26,17 +39,25 @@ public class MainActivity extends AppCompatActivity {
     public static final int GET_VIDEO_URL_CODE = 1221;
     public static final int OVERLAY_CODE = 1222;
     public static final int STORAGE_CODE = 34;
-    ArrayList<Uri> videoList = new ArrayList<Uri>();
+    ArrayList<Uri> videoList;
     Intent serviceIntent;
+    RecyclerView rvPlaylist;
+    ArrayList<PlaylistPOJO> playlist;
+    PlaylistAdapter playlistAdapter;
+    TextView tvTemp;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        this.askingStoragePermission();
+    public void initialise() {
 
         btn = (Button) findViewById(R.id.btn);
+        rvPlaylist = (RecyclerView) findViewById(R.id.rvPlaylist);
+        tvTemp = (TextView) findViewById(R.id.tvTemp);
+
+        videoList = new ArrayList<>();
+
+        playlist = new ArrayList<>();
+        playlistAdapter = new PlaylistAdapter(this, playlist);
+        rvPlaylist.setAdapter(playlistAdapter);
+        rvPlaylist.setLayoutManager(new LinearLayoutManager(this));
 
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -53,11 +74,19 @@ public class MainActivity extends AppCompatActivity {
                 else
                     Toast.makeText(MainActivity.this, "ELSE", Toast.LENGTH_SHORT).show();
 
-                //startActivityForResult(mediaChoser,GET_VIDEO_URL_CODE);
                 startActivityForResult(Intent.createChooser(mediaChoser, "Select Videos"), GET_VIDEO_URL_CODE);
 
             }
         });
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        this.initialise();
+        this.askingStoragePermission();
 
     }
 
@@ -75,7 +104,6 @@ public class MainActivity extends AppCompatActivity {
     public void askingStoragePermission() {
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-
             //permission granted do nothing
         } else {
 
@@ -112,9 +140,16 @@ public class MainActivity extends AppCompatActivity {
                             ClipData.Item item = mClipData.getItemAt(i);
                             Uri uri = item.getUri();
                             videoList.add(uri);
+                            playlist.add(new PlaylistPOJO(uri.toString(), this.createVideoThumbnail(uri)));
 
                         }
                     }
+
+                    Log.d(TAG, "onActivityResult: " + playlist.toString());
+                    tvTemp.setVisibility(View.GONE);
+                    rvPlaylist.setVisibility(View.VISIBLE);
+
+                    playlistAdapter.notifyDataSetChanged();
 
                     if (serviceIntent != null) {
 
@@ -129,7 +164,7 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 }
 
-
+                Log.d(TAG, "playlist " + playlist);
         }
     }
 
@@ -149,5 +184,20 @@ public class MainActivity extends AppCompatActivity {
 
         }
 
+    }
+
+    public Bitmap createVideoThumbnail(Uri uri) {
+
+        /*File path = new File(uri.toString());
+        Log.d(TAG, "createVideoThumbnail: "+path.getAbsolutePath());
+        Bitmap thumbnail = ThumbnailUtils.createVideoThumbnail(path.getAbsolutePath(), MediaStore.Video.Thumbnails.FULL_SCREEN_KIND);*/
+
+        MediaMetadataRetriever mmr = new MediaMetadataRetriever();
+        mmr.setDataSource(uri.toString());
+
+       Bitmap thumbnail = null;//mmr.getFrameAtTime();
+        mmr.release();
+        Toast.makeText(this, ""+thumbnail, Toast.LENGTH_SHORT).show();
+        return thumbnail;
     }
 }

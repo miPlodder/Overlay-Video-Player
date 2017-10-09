@@ -9,8 +9,23 @@
 
     <Button
         android:id="@+id/btn"
-        android:text="Start Floating Window"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:text="Add Video Playlist" />
+
+    <TextView
+        android:id="@+id/tvTemp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:text="No Playlist Selected"
+        android:textSize="20sp" />
+
+    <android.support.v7.widget.RecyclerView
+
+        android:id="@+id/rvPlaylist"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone" />
 
 </LinearLayout>
