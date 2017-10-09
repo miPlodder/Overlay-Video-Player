@@ -188,16 +188,13 @@ public class MainActivity extends AppCompatActivity {
 
     public Bitmap createVideoThumbnail(Uri uri) {
 
-        /*File path = new File(uri.toString());
+        File path = new File(uri.toString().substring(5));
+
         Log.d(TAG, "createVideoThumbnail: "+path.getAbsolutePath());
-        Bitmap thumbnail = ThumbnailUtils.createVideoThumbnail(path.getAbsolutePath(), MediaStore.Video.Thumbnails.FULL_SCREEN_KIND);*/
 
-        MediaMetadataRetriever mmr = new MediaMetadataRetriever();
-        mmr.setDataSource(uri.toString());
+        Bitmap thumbnail = ThumbnailUtils.createVideoThumbnail(path.getAbsolutePath(), MediaStore.Video.Thumbnails.FULL_SCREEN_KIND);
 
-       Bitmap thumbnail = null;//mmr.getFrameAtTime();
-        mmr.release();
-        Toast.makeText(this, ""+thumbnail, Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "" + thumbnail, Toast.LENGTH_SHORT).show();
         return thumbnail;
     }
 }
