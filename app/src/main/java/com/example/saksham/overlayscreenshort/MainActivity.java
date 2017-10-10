@@ -39,10 +39,10 @@ public class MainActivity extends AppCompatActivity {
     public static final int GET_VIDEO_URL_CODE = 1221;
     public static final int OVERLAY_CODE = 1222;
     public static final int STORAGE_CODE = 34;
-    ArrayList<Uri> videoList;
     Intent serviceIntent;
     RecyclerView rvPlaylist;
     ArrayList<PlaylistPOJO> playlist;
+    ArrayList<Uri> videoUri;
     PlaylistAdapter playlistAdapter;
     TextView tvTemp;
 
@@ -52,10 +52,26 @@ public class MainActivity extends AppCompatActivity {
         rvPlaylist = (RecyclerView) findViewById(R.id.rvPlaylist);
         tvTemp = (TextView) findViewById(R.id.tvTemp);
 
-        videoList = new ArrayList<>();
+        videoUri = new ArrayList<>();
 
         playlist = new ArrayList<>();
-        playlistAdapter = new PlaylistAdapter(this, playlist);
+        playlistAdapter = new PlaylistAdapter(this, playlist, videoUri,
+                new PlaylistAdapter.OnItemClickListener() {
+                    @Override
+                    public void setOnItemClickListener() {
+
+                    }
+                },
+                new PlaylistAdapter.OnStartNewService() {
+
+                    @Override
+                    public void onStartService(ArrayList<Uri> videoUri) {
+
+                        //from here service will be started when item from recycler view is deleted
+                        startNewService(videoUri);
+                        Log.d(TAG, "videouri from adapter" + videoUri.size());
+                    }
+                });
         rvPlaylist.setAdapter(playlistAdapter);
         rvPlaylist.setLayoutManager(new LinearLayoutManager(this));
 
@@ -139,33 +155,41 @@ public class MainActivity extends AppCompatActivity {
 
                             ClipData.Item item = mClipData.getItemAt(i);
                             Uri uri = item.getUri();
-                            videoList.add(uri);
-                            playlist.add(new PlaylistPOJO(uri.toString(), this.createVideoThumbnail(uri)));
+                            videoUri.add(uri);
+                            playlist.add(new PlaylistPOJO(this.pathToNameConvertor(uri.toString()),
+                                    this.createVideoThumbnail(uri), uri));
 
                         }
                     }
 
-                    Log.d(TAG, "onActivityResult: " + playlist.toString());
                     tvTemp.setVisibility(View.GONE);
                     rvPlaylist.setVisibility(View.VISIBLE);
 
                     playlistAdapter.notifyDataSetChanged();
 
-                    if (serviceIntent != null) {
+                    //from here service will be called when videos are selected from the gallery
+                    this.startNewService(videoUri);
 
-                        stopService(serviceIntent);
-                    }
-                    serviceIntent = new Intent(
-                            MainActivity.this,
-                            FloatService.class
-                    );
-                    serviceIntent.putExtra("videoList", videoList);
-                    startService(serviceIntent);
+                    Log.d(TAG, "videouri from mainactivty" + videoUri.size());
                     break;
                 }
-
-                Log.d(TAG, "playlist " + playlist);
         }
+    }
+
+    public void startNewService(ArrayList<Uri> videoUri) {
+
+        if (serviceIntent != null) {
+
+            stopService(serviceIntent);
+        }
+        serviceIntent = new Intent(
+                MainActivity.this,
+                FloatService.class
+        );
+
+        serviceIntent.putExtra("videoList", videoUri);
+        startService(serviceIntent);
+
     }
 
     @Override
@@ -190,11 +214,25 @@ public class MainActivity extends AppCompatActivity {
 
         File path = new File(uri.toString().substring(5));
 
-        Log.d(TAG, "createVideoThumbnail: "+path.getAbsolutePath());
-
         Bitmap thumbnail = ThumbnailUtils.createVideoThumbnail(path.getAbsolutePath(), MediaStore.Video.Thumbnails.FULL_SCREEN_KIND);
 
-        Toast.makeText(this, "" + thumbnail, Toast.LENGTH_SHORT).show();
         return thumbnail;
     }
+
+    public String pathToNameConvertor(String path) {
+
+        StringBuffer videoName = new StringBuffer();
+
+        for (int i = path.length() - 1; i >= 0; i--) {
+
+            if (path.charAt(i) == '/') {
+                break;
+            }
+
+            videoName.append(path.charAt(i));
+        }
+
+        return videoName.reverse().toString();
+    }
+
 }

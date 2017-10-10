@@ -9,6 +9,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -26,12 +27,29 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
 
     ArrayList<PlaylistPOJO> items;
     Context context;
+    ArrayList<Uri> videoUri;
+    OnItemClickListener onItemClickListener;
+    OnStartNewService onStartNewService;
+
+    interface OnItemClickListener{
+
+        void setOnItemClickListener();
+
+    }
+
+    interface OnStartNewService{
+
+        void onStartService(ArrayList<Uri> videoUri);
+    }
 
 
-    public PlaylistAdapter(Context context, ArrayList<PlaylistPOJO> items){
+    public PlaylistAdapter(Context context, ArrayList<PlaylistPOJO> items, ArrayList<Uri> videoUri,  OnItemClickListener onItemClickListener, OnStartNewService onStartNewService){
 
         this.context = context;
         this.items = items;
+        this.videoUri = videoUri;
+        this.onStartNewService = onStartNewService;
+        this.onItemClickListener = onItemClickListener;
 
     }
 
@@ -47,10 +65,28 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
     }
 
     @Override
-    public void onBindViewHolder(final PlaylistViewHolder holder, int position) {
+    public void onBindViewHolder(final PlaylistViewHolder holder, final int position) {
 
         holder.tvVideoName.setText(items.get(position).getName());
         holder.ivThumbnail.setImageBitmap(items.get(position).getThumbnail());
+
+        holder.ibRemove.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                items.remove(position);
+                onStartNewService.onStartService(setVideoUri());
+                notifyDataSetChanged();
+            }
+        });
+
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                Toast.makeText(context, "Touched", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     @Override
@@ -62,13 +98,28 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
 
         ImageView ivThumbnail;
         TextView tvVideoName;
+        ImageButton ibRemove;
 
         public PlaylistViewHolder(View itemView) {
             super(itemView);
 
             ivThumbnail = (ImageView) itemView.findViewById(R.id.ibVideoThumbnail);
             tvVideoName = (TextView) itemView.findViewById(R.id.tvVideoName);
+            ibRemove = (ImageButton) itemView.findViewById(R.id.ibRemove);
 
         }
+    }
+
+    private ArrayList<Uri> setVideoUri(){
+
+        videoUri.clear();
+
+        for(PlaylistPOJO item : items){
+
+            videoUri.add(item.getUri());
+
+        }
+
+        return videoUri;
     }
 }

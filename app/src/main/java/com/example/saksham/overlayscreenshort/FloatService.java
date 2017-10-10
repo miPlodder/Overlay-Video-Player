@@ -34,6 +34,7 @@ public class FloatService extends Service implements View.OnClickListener {
     int prevVideoIndex = 0;
     WindowManager.LayoutParams wParams;
     boolean isFirstView = true;
+    WindowManager.LayoutParams prevParams;
 
     public FloatService() {
 
@@ -48,6 +49,8 @@ public class FloatService extends Service implements View.OnClickListener {
         ibtnClose = (ImageButton) view.findViewById(R.id.ibtnClose);
 
         videoList = (ArrayList<Uri>) intent.getSerializableExtra("videoList");
+
+        Log.d(TAG, "initialise: " + videoList);
         windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
 
         ibtnClose.setOnClickListener(this);
@@ -55,7 +58,6 @@ public class FloatService extends Service implements View.OnClickListener {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-
 
         this.initialise(intent);
         this.addVideoToVideoView();
@@ -67,19 +69,25 @@ public class FloatService extends Service implements View.OnClickListener {
 
     public void addVideoToVideoView() {
 
-        vvVideo.setVideoURI(videoList.get(0));
-        vvVideo.requestFocus();
-        vvVideo.start();
-        vvVideo.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-            @Override
-            public void onCompletion(MediaPlayer mp) {
+        if (videoList.size() != 0) {
+            vvVideo.setVideoURI(videoList.get(0));
+            vvVideo.requestFocus();
+            vvVideo.start();
+            vvVideo.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                @Override
+                public void onCompletion(MediaPlayer mp) {
 
-                prevVideoIndex++;
-                int temp = ((prevVideoIndex) % videoList.size());
-                vvVideo.setVideoURI(videoList.get(temp));
-                vvVideo.start();
-            }
-        });
+                    prevVideoIndex++;
+                    int temp = ((prevVideoIndex) % videoList.size());
+                    vvVideo.setVideoURI(videoList.get(temp));
+                    vvVideo.start();
+                }
+            });
+        }else{
+
+            stopSelf();
+            Toast.makeText(this, "Not video selected", Toast.LENGTH_SHORT).show();
+        }
     }
 
     public void addWindowManager() {
@@ -123,6 +131,7 @@ public class FloatService extends Service implements View.OnClickListener {
                         updatedParams.y = (int) (y + (event.getRawY()) - touchedY);
 
                         windowManager.updateViewLayout(linearLayout, updatedParams);
+                        prevParams = updatedParams;
 
                         break;
                     default:
