@@ -1,0 +1,15 @@
+
+            /*case R.id.ibFullscreen:
+
+                *//*WindowManager.LayoutParams params = new WindowManager.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.TYPE_PHONE, WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, PixelFormat.TRANSLUCENT);
+
+                windowManager.updateViewLayout(view, params);*//*
+
+                ViewGroup.LayoutParams params = vvVideo.getLayoutParams();
+                params.width = ViewGroup.LayoutParams.MATCH_PARENT;
+                params.height = ViewGroup.LayoutParams.MATCH_PARENT;
+
+                vvVideo.setLayoutParams(params);
+                Toast.makeText(this, "" + params.width + "," + params.height, Toast.LENGTH_SHORT).show();
+                break;*/

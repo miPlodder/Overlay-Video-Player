@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -31,19 +32,19 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
     OnItemClickListener onItemClickListener;
     OnStartNewService onStartNewService;
 
-    interface OnItemClickListener{
+    interface OnItemClickListener {
 
-        void setOnItemClickListener();
+        void setOnItemClickListener(ArrayList<Uri> videoUri, int position);
 
     }
 
-    interface OnStartNewService{
+    interface OnStartNewService {
 
         void onStartService(ArrayList<Uri> videoUri);
     }
 
 
-    public PlaylistAdapter(Context context, ArrayList<PlaylistPOJO> items, ArrayList<Uri> videoUri,  OnItemClickListener onItemClickListener, OnStartNewService onStartNewService){
+    public PlaylistAdapter(Context context, ArrayList<PlaylistPOJO> items, ArrayList<Uri> videoUri, OnItemClickListener onItemClickListener, OnStartNewService onStartNewService) {
 
         this.context = context;
         this.items = items;
@@ -58,7 +59,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
     public PlaylistViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View view = inflater.inflate(R.layout.item_playlist_recycler_view,parent,false);
+        View view = inflater.inflate(R.layout.item_playlist_recycler_view, parent, false);
 
 
         return new PlaylistViewHolder(view);
@@ -80,11 +81,12 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
             }
         });
 
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
+        holder.llClicker.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
                 Toast.makeText(context, "Touched", Toast.LENGTH_SHORT).show();
+                onItemClickListener.setOnItemClickListener(setVideoUri(), position);
             }
         });
     }
@@ -94,11 +96,12 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
         return items.size();
     }
 
-    public class PlaylistViewHolder extends RecyclerView.ViewHolder{
+    public class PlaylistViewHolder extends RecyclerView.ViewHolder {
 
         ImageView ivThumbnail;
         TextView tvVideoName;
         ImageButton ibRemove;
+        LinearLayout llClicker;
 
         public PlaylistViewHolder(View itemView) {
             super(itemView);
@@ -106,15 +109,16 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
             ivThumbnail = (ImageView) itemView.findViewById(R.id.ibVideoThumbnail);
             tvVideoName = (TextView) itemView.findViewById(R.id.tvVideoName);
             ibRemove = (ImageButton) itemView.findViewById(R.id.ibRemove);
+            llClicker = (LinearLayout) itemView.findViewById(R.id.llClicker);
 
         }
     }
 
-    private ArrayList<Uri> setVideoUri(){
+    private ArrayList<Uri> setVideoUri() {
 
         videoUri.clear();
 
-        for(PlaylistPOJO item : items){
+        for (PlaylistPOJO item : items) {
 
             videoUri.add(item.getUri());
 

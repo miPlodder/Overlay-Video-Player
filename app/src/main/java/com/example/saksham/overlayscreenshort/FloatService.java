@@ -2,12 +2,14 @@ package com.example.saksham.overlayscreenshort;
 
 import android.app.Service;
 import android.content.Intent;
+import android.gesture.Gesture;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.IBinder;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -35,6 +37,8 @@ public class FloatService extends Service implements View.OnClickListener {
     WindowManager.LayoutParams wParams;
     boolean isFirstView = true;
     WindowManager.LayoutParams prevParams;
+    int videoPosition = 0;
+    GestureDetector gestureDetector;
 
     public FloatService() {
 
@@ -49,11 +53,23 @@ public class FloatService extends Service implements View.OnClickListener {
         ibtnClose = (ImageButton) view.findViewById(R.id.ibtnClose);
 
         videoList = (ArrayList<Uri>) intent.getSerializableExtra("videoList");
+        videoPosition = intent.getIntExtra("position", -1);
 
         Log.d(TAG, "initialise: " + videoList);
         windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
 
         ibtnClose.setOnClickListener(this);
+
+        gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
+
+            @Override
+            public boolean onDoubleTap(MotionEvent e) {
+
+                openActivity();
+                return super.onDoubleTap(e);
+            }
+
+        });
     }
 
     @Override
@@ -70,7 +86,8 @@ public class FloatService extends Service implements View.OnClickListener {
     public void addVideoToVideoView() {
 
         if (videoList.size() != 0) {
-            vvVideo.setVideoURI(videoList.get(0));
+
+            vvVideo.setVideoURI(videoList.get(videoPosition));
             vvVideo.requestFocus();
             vvVideo.start();
             vvVideo.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
@@ -83,10 +100,10 @@ public class FloatService extends Service implements View.OnClickListener {
                     vvVideo.start();
                 }
             });
-        }else{
+        } else {
 
             stopSelf();
-            Toast.makeText(this, "Not video selected", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "No video selected", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -125,6 +142,7 @@ public class FloatService extends Service implements View.OnClickListener {
                         touchedY = event.getRawY();
 
                         break;
+
                     case MotionEvent.ACTION_MOVE:
 
                         updatedParams.x = (int) (x + (event.getRawX() - touchedX));
@@ -132,17 +150,19 @@ public class FloatService extends Service implements View.OnClickListener {
 
                         windowManager.updateViewLayout(linearLayout, updatedParams);
                         prevParams = updatedParams;
-
                         break;
+
                     default:
                         break;
+
                 }
+
+                gestureDetector.onTouchEvent(event);
 
                 return false;
             }
         });
     }
-
 
     @Override
     public void onClick(View v) {
@@ -154,8 +174,21 @@ public class FloatService extends Service implements View.OnClickListener {
 
                 stopSelf();
                 break;
+
+            case R.id.ll:
+
+                openActivity();
+                break;
         }
 
+    }
+
+    public void openActivity() {
+
+        startActivity((new Intent(
+                this,
+                MainActivity.class
+        )).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
     }
 
     @Override

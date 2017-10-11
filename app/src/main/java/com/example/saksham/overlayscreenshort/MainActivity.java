@@ -58,7 +58,9 @@ public class MainActivity extends AppCompatActivity {
         playlistAdapter = new PlaylistAdapter(this, playlist, videoUri,
                 new PlaylistAdapter.OnItemClickListener() {
                     @Override
-                    public void setOnItemClickListener() {
+                    public void setOnItemClickListener(ArrayList<Uri> videoUri, int position) {
+
+                        startNewService(videoUri, position);
 
                     }
                 },
@@ -68,7 +70,7 @@ public class MainActivity extends AppCompatActivity {
                     public void onStartService(ArrayList<Uri> videoUri) {
 
                         //from here service will be started when item from recycler view is deleted
-                        startNewService(videoUri);
+                        startNewService(videoUri, 0);
                         Log.d(TAG, "videouri from adapter" + videoUri.size());
                     }
                 });
@@ -168,7 +170,7 @@ public class MainActivity extends AppCompatActivity {
                     playlistAdapter.notifyDataSetChanged();
 
                     //from here service will be called when videos are selected from the gallery
-                    this.startNewService(videoUri);
+                    this.startNewService(videoUri, 0);
 
                     Log.d(TAG, "videouri from mainactivty" + videoUri.size());
                     break;
@@ -176,7 +178,8 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void startNewService(ArrayList<Uri> videoUri) {
+    //position - the video which has to be played from the playlist
+    public void startNewService(ArrayList<Uri> videoUri, int position) {
 
         if (serviceIntent != null) {
 
@@ -188,6 +191,7 @@ public class MainActivity extends AppCompatActivity {
         );
 
         serviceIntent.putExtra("videoList", videoUri);
+        serviceIntent.putExtra("position", position);
         startService(serviceIntent);
 
     }

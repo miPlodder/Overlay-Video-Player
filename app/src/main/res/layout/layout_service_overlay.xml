@@ -9,18 +9,25 @@
         android:layout_height="wrap_content">
 
         <VideoView
+
             android:id="@+id/vvVideo"
             android:layout_width="250dp"
             android:layout_height="150dp"
-            android:backgroundTint="#FFF"
-            android:layout_gravity="center" />
+            android:layout_gravity="center"
+            android:backgroundTint="#000" />
 
-        <ImageButton
-            android:id="@+id/ibtnClose"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+        <LinearLayout
             android:layout_gravity="right"
-            android:background="@drawable/imagebutton_stroke_border"
-            android:src="@drawable/ic_close" />
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <ImageButton
+                android:id="@+id/ibtnClose"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/imagebutton_stroke_border"
+                android:src="@drawable/ic_close" />
+
+        </LinearLayout>
     </FrameLayout>
 </LinearLayout>
