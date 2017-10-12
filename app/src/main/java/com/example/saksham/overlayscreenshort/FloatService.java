@@ -56,7 +56,7 @@ public class FloatService extends Service implements View.OnClickListener {
         ibtnClose = (ImageButton) view.findViewById(R.id.ibtnClose);
 
         //initilaising the shared preference
-        sharedPreferences = getSharedPreferences(Constants.COMMON_SHARED_PREF,MODE_PRIVATE);
+        sharedPreferences = getSharedPreferences(Constants.COMMON_SHARED_PREF, MODE_PRIVATE);
         editor = sharedPreferences.edit();
 
         //storing 0 temporary in the shared preference
@@ -110,23 +110,21 @@ public class FloatService extends Service implements View.OnClickListener {
 
                     editor.putInt(Constants.CURRENT_VIDEO_SHARED_PREF, temp);
                     editor.commit();
-                    Toast.makeText(FloatService.this, "video number -> " +temp, Toast.LENGTH_SHORT).show();
                     vvVideo.start();
                 }
             });
         } else {
 
             stopSelf();
-            Toast.makeText(this, "No video selected", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "No video in Playlist", Toast.LENGTH_SHORT).show();
         }
     }
 
     public void addWindowManager() {
 
         wParams = new WindowManager.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.TYPE_PHONE, WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, PixelFormat.TRANSLUCENT);
-        wParams.x = 0;
-        wParams.y = 0;
-        wParams.gravity = Gravity.CENTER;
+        wParams.x = sharedPreferences.getInt(Constants.CURRENT_X, -1);
+        wParams.y = sharedPreferences.getInt(Constants.CURRENT_Y, -1);
 
         if (!isFirstView) {
 
@@ -164,6 +162,11 @@ public class FloatService extends Service implements View.OnClickListener {
 
                         windowManager.updateViewLayout(linearLayout, updatedParams);
                         prevParams = updatedParams;
+
+                        editor.putInt(Constants.CURRENT_X, updatedParams.x);
+                        editor.putInt(Constants.CURRENT_Y, updatedParams.y);
+                        editor.commit();
+
                         break;
 
                     default:
@@ -205,7 +208,6 @@ public class FloatService extends Service implements View.OnClickListener {
         )).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
     }
 
-    
 
     @Override
     public void onDestroy() {

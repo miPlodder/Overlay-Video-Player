@@ -62,6 +62,11 @@ public class MainActivity extends AppCompatActivity {
         sharedPreference = getSharedPreferences(Constants.COMMON_SHARED_PREF, MODE_PRIVATE);
         editor = sharedPreference.edit();
 
+        editor.putInt(Constants.CURRENT_X, 0);
+        editor.putInt(Constants.CURRENT_Y, 0);
+
+        editor.commit();
+
         playlist = new ArrayList<>();
         playlistAdapter = new PlaylistAdapter(this, playlist, videoUri,
                 new PlaylistAdapter.OnItemClickListener() {
@@ -78,7 +83,6 @@ public class MainActivity extends AppCompatActivity {
                     public void onStartService(ArrayList<Uri> videoUri, int position) {
 
                         currentVideoPosition = sharedPreference.getInt(Constants.CURRENT_VIDEO_SHARED_PREF, -1);
-                        Toast.makeText(MainActivity.this, "currentposition = " + currentVideoPosition, Toast.LENGTH_SHORT).show();
 
                         if (position == currentVideoPosition) {
 
@@ -97,7 +101,6 @@ public class MainActivity extends AppCompatActivity {
 
                         } else {
 
-                            Toast.makeText(MainActivity.this, "current position", Toast.LENGTH_SHORT).show();
                             startNewService(videoUri, currentVideoPosition);
 
                         }
@@ -119,7 +122,7 @@ public class MainActivity extends AppCompatActivity {
                 if (Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN_MR2)
                     mediaChoser.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
                 else
-                    Toast.makeText(MainActivity.this, "ELSE", Toast.LENGTH_SHORT).show();
+                {}
 
                 startActivityForResult(Intent.createChooser(mediaChoser, "Select Videos"), GET_VIDEO_URL_CODE);
 
@@ -170,7 +173,6 @@ public class MainActivity extends AppCompatActivity {
 
             case OVERLAY_CODE:
 
-                Toast.makeText(this, "Overlay Activity Result", Toast.LENGTH_SHORT).show();
                 break;
 
             case GET_VIDEO_URL_CODE:
