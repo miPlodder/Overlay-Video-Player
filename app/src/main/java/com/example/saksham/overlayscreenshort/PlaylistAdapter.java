@@ -40,7 +40,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
 
     interface OnStartNewService {
 
-        void onStartService(ArrayList<Uri> videoUri);
+        void onStartService(ArrayList<Uri> videoUri, int position);
     }
 
 
@@ -76,7 +76,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
             public void onClick(View v) {
 
                 items.remove(position);
-                onStartNewService.onStartService(setVideoUri());
+                onStartNewService.onStartService(setVideoUri(), position);
                 notifyDataSetChanged();
             }
         });
@@ -85,7 +85,6 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
             @Override
             public void onClick(View v) {
 
-                Toast.makeText(context, "Touched", Toast.LENGTH_SHORT).show();
                 onItemClickListener.setOnItemClickListener(setVideoUri(), position);
             }
         });

@@ -3,6 +3,7 @@ package com.example.saksham.overlayscreenshort;
 import android.Manifest;
 import android.content.ClipData;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.media.MediaMetadataRetriever;
@@ -45,6 +46,9 @@ public class MainActivity extends AppCompatActivity {
     ArrayList<Uri> videoUri;
     PlaylistAdapter playlistAdapter;
     TextView tvTemp;
+    SharedPreferences sharedPreference;
+    SharedPreferences.Editor editor;
+    int currentVideoPosition;
 
     public void initialise() {
 
@@ -53,6 +57,10 @@ public class MainActivity extends AppCompatActivity {
         tvTemp = (TextView) findViewById(R.id.tvTemp);
 
         videoUri = new ArrayList<>();
+
+        //initialising the shared preference
+        sharedPreference = getSharedPreferences(Constants.COMMON_SHARED_PREF, MODE_PRIVATE);
+        editor = sharedPreference.edit();
 
         playlist = new ArrayList<>();
         playlistAdapter = new PlaylistAdapter(this, playlist, videoUri,
@@ -67,11 +75,32 @@ public class MainActivity extends AppCompatActivity {
                 new PlaylistAdapter.OnStartNewService() {
 
                     @Override
-                    public void onStartService(ArrayList<Uri> videoUri) {
+                    public void onStartService(ArrayList<Uri> videoUri, int position) {
 
-                        //from here service will be started when item from recycler view is deleted
-                        startNewService(videoUri, 0);
-                        Log.d(TAG, "videouri from adapter" + videoUri.size());
+                        currentVideoPosition = sharedPreference.getInt(Constants.CURRENT_VIDEO_SHARED_PREF, -1);
+                        Toast.makeText(MainActivity.this, "currentposition = " + currentVideoPosition, Toast.LENGTH_SHORT).show();
+
+                        if (position == currentVideoPosition) {
+
+                            //from here service will be started when item from recycler view is deleted
+                            if (position < videoUri.size()) {
+
+                                startNewService(videoUri, position);
+                            } else {
+
+                                startNewService(videoUri, 0);
+
+                            }
+                        } else if (position == -1) {
+
+                            Toast.makeText(MainActivity.this, "Bug", Toast.LENGTH_SHORT).show();
+
+                        } else {
+
+                            Toast.makeText(MainActivity.this, "current position", Toast.LENGTH_SHORT).show();
+                            startNewService(videoUri, currentVideoPosition);
+
+                        }
                     }
                 });
         rvPlaylist.setAdapter(playlistAdapter);
@@ -157,10 +186,13 @@ public class MainActivity extends AppCompatActivity {
 
                             ClipData.Item item = mClipData.getItemAt(i);
                             Uri uri = item.getUri();
-                            videoUri.add(uri);
-                            playlist.add(new PlaylistPOJO(this.pathToNameConvertor(uri.toString()),
-                                    this.createVideoThumbnail(uri), uri));
-
+                            if (isItemPresent(uri)) {
+                                Log.d(TAG, "onActivityResult: do nothing");
+                            } else {
+                                videoUri.add(uri);
+                                playlist.add(new PlaylistPOJO(this.pathToNameConvertor(uri.toString()),
+                                        this.createVideoThumbnail(uri), uri));
+                            }
                         }
                     }
 
@@ -227,6 +259,7 @@ public class MainActivity extends AppCompatActivity {
 
         StringBuffer videoName = new StringBuffer();
 
+        Log.d(TAG, "pathToNameConvertor: path -> " + path);
         for (int i = path.length() - 1; i >= 0; i--) {
 
             if (path.charAt(i) == '/') {
@@ -236,7 +269,26 @@ public class MainActivity extends AppCompatActivity {
             videoName.append(path.charAt(i));
         }
 
-        return videoName.reverse().toString();
+        String rv = videoName.reverse().toString();
+        rv = rv.replaceAll("%5B", "[");
+        rv = rv.replaceAll("%5D", "]");
+        rv = rv.replaceAll("%20", " ");
+
+        return rv;
+    }
+
+    public boolean isItemPresent(Uri uri) {
+
+        for (Uri item : videoUri) {
+
+            if (item.toString().equals(uri.toString())) {
+                return true;
+            } else {
+
+            }
+        }
+
+        return false;
     }
 
 }

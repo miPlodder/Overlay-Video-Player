@@ -2,6 +2,7 @@ package com.example.saksham.overlayscreenshort;
 
 import android.app.Service;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.gesture.Gesture;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
@@ -39,6 +40,8 @@ public class FloatService extends Service implements View.OnClickListener {
     WindowManager.LayoutParams prevParams;
     int videoPosition = 0;
     GestureDetector gestureDetector;
+    SharedPreferences sharedPreferences;
+    SharedPreferences.Editor editor;
 
     public FloatService() {
 
@@ -52,10 +55,17 @@ public class FloatService extends Service implements View.OnClickListener {
         vvVideo = (VideoView) view.findViewById(R.id.vvVideo);
         ibtnClose = (ImageButton) view.findViewById(R.id.ibtnClose);
 
+        //initilaising the shared preference
+        sharedPreferences = getSharedPreferences(Constants.COMMON_SHARED_PREF,MODE_PRIVATE);
+        editor = sharedPreferences.edit();
+
+        //storing 0 temporary in the shared preference
+        editor.putInt(Constants.CURRENT_VIDEO_SHARED_PREF, 0);
+        editor.commit();
+
         videoList = (ArrayList<Uri>) intent.getSerializableExtra("videoList");
         videoPosition = intent.getIntExtra("position", -1);
 
-        Log.d(TAG, "initialise: " + videoList);
         windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
 
         ibtnClose.setOnClickListener(this);
@@ -97,6 +107,10 @@ public class FloatService extends Service implements View.OnClickListener {
                     prevVideoIndex++;
                     int temp = ((prevVideoIndex) % videoList.size());
                     vvVideo.setVideoURI(videoList.get(temp));
+
+                    editor.putInt(Constants.CURRENT_VIDEO_SHARED_PREF, temp);
+                    editor.commit();
+                    Toast.makeText(FloatService.this, "video number -> " +temp, Toast.LENGTH_SHORT).show();
                     vvVideo.start();
                 }
             });
@@ -190,6 +204,8 @@ public class FloatService extends Service implements View.OnClickListener {
                 MainActivity.class
         )).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
     }
+
+    
 
     @Override
     public void onDestroy() {
