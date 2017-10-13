@@ -7,12 +7,6 @@
     android:orientation="vertical"
     tools:context="com.example.saksham.overlayscreenshort.MainActivity">
 
-    <Button
-        android:id="@+id/btn"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Add Video Playlist" />
-
     <TextView
         android:id="@+id/tvTemp"
         android:layout_width="match_parent"

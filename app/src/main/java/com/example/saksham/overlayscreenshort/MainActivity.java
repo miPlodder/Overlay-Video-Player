@@ -15,9 +15,13 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -28,8 +32,6 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
-
-    Button btn;
     public static final String TAG = "MainActivity";
     public static final int GET_VIDEO_URL_CODE = 1221;
     public static final int OVERLAY_CODE = 1222;
@@ -43,10 +45,12 @@ public class MainActivity extends AppCompatActivity {
     SharedPreferences sharedPreference;
     SharedPreferences.Editor editor;
     int currentVideoPosition;
+    LinearLayoutManager linearLayoutManager;
 
     public void initialise() {
 
-        btn = (Button) findViewById(R.id.btn);
+        getSupportActionBar().setTitle("Playlist");
+
         rvPlaylist = (RecyclerView) findViewById(R.id.rvPlaylist);
         tvTemp = (TextView) findViewById(R.id.tvTemp);
 
@@ -55,7 +59,6 @@ public class MainActivity extends AppCompatActivity {
         //initialising the shared preference
         sharedPreference = getSharedPreferences(Constants.COMMON_SHARED_PREF, MODE_PRIVATE);
         editor = sharedPreference.edit();
-        Log.d(TAG, "editing: ");
 
         //initialising the shared prefereence variable
         editor.putInt(Constants.CURRENT_PLAYING_VIDEO_NUMBER, 0);
@@ -70,67 +73,61 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void setOnItemClickListener(ArrayList<Uri> videoUri, int position) {
 
+                        Toast.makeText(MainActivity.this, "clicking", Toast.LENGTH_SHORT).show();
+                        PlaylistAdapter.changeActiveItemBackground(sharedPreference.getInt(Constants.CURRENT_PLAYING_VIDEO_NUMBER, -1), position);
                         editor.putInt(Constants.CURRENT_PLAYING_VIDEO_NUMBER, position);
                         editor.commit();
                         startNewService(videoUri, position, false);
 
                     }
                 },
+
                 new PlaylistAdapter.OnStartNewService() {
 
                     @Override
                     public void onStartService(ArrayList<Uri> videoUri, int position) {
 
-                        Log.d(TAG, "onStartService: ->" + false);
                         currentVideoPosition = sharedPreference.getInt(Constants.CURRENT_PLAYING_VIDEO_NUMBER, -1);
-                        Log.d(TAG, "onStartService: -> currentVideoPosition" + currentVideoPosition);
 
+                        //position and playing video are same
                         if (position == currentVideoPosition) {
 
-                            Log.d(TAG, "onStartService: -> equal" + position);
                             //from here service will be started when item from recycler view is deleted
-                            if (position < videoUri.size()) {
+                            if (position == (videoUri.size())) {
 
-                                startNewService(videoUri, position, false);
-                            } else {
+                                editor.putInt(Constants.CURRENT_PLAYING_VIDEO_NUMBER, 0);
+                                editor.commit();
+
 
                                 startNewService(videoUri, 0, false);
+                                PlaylistAdapter.changeActiveItemBackground(currentVideoPosition, 0);
 
+                            } else {
+
+                                startNewService(videoUri, position, false);
+                                PlaylistAdapter.changeActiveItemBackground(currentVideoPosition, position);
                             }
-                        } else if (position == -1) {
 
-                            Toast.makeText(MainActivity.this, "Bug", Toast.LENGTH_SHORT).show();
+                        } else if (position < currentVideoPosition) {
 
-                        } else {
+                            editor.putInt(Constants.CURRENT_PLAYING_VIDEO_NUMBER, currentVideoPosition - 1);
+                            editor.commit();
+                            startNewService(videoUri, currentVideoPosition - 1, false);
+                            PlaylistAdapter.changeActiveItemBackground(currentVideoPosition, currentVideoPosition - 1);
+
+                        } else if (position > currentVideoPosition) {
 
                             startNewService(videoUri, currentVideoPosition, false);
-
+                            PlaylistAdapter.changeActiveItemBackground(currentVideoPosition, currentVideoPosition);
                         }
                     }
                 });
 
         rvPlaylist.setAdapter(playlistAdapter);
-        rvPlaylist.setLayoutManager(new LinearLayoutManager(this));
 
-        btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        linearLayoutManager = new LinearLayoutManager(this);
+        rvPlaylist.setLayoutManager(new GridLayoutManager(this, 2));
 
-                askingPermissionForOverlayScreen();
-
-                Intent mediaChoser = new Intent();
-                mediaChoser.setAction(Intent.ACTION_GET_CONTENT);
-                mediaChoser.setType("video/*");
-
-                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN_MR2)
-                    mediaChoser.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-                else {
-                }
-
-                startActivityForResult(Intent.createChooser(mediaChoser, "Select Videos"), GET_VIDEO_URL_CODE);
-
-            }
-        });
     }
 
     @Override
@@ -181,6 +178,7 @@ public class MainActivity extends AppCompatActivity {
             case GET_VIDEO_URL_CODE:
 
                 if (data != null) {
+
                     if (data.getData() != null) {
                         Log.d(TAG, "data " + data.getData());
                     } else {
@@ -201,8 +199,8 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
 
-                    tvTemp.setVisibility(View.GONE);
-                    rvPlaylist.setVisibility(View.VISIBLE);
+                    linearLayoutManager.scrollToPosition(videoUri.size() - 1);
+                    rvPlaylist.setOverScrollMode(View.OVER_SCROLL_ALWAYS);
 
                     playlistAdapter.notifyDataSetChanged();
 
@@ -215,8 +213,19 @@ public class MainActivity extends AppCompatActivity {
 
     //position - the video which has to be played from the playlist
     //isFromIntent -> true when from intent
-    //false when from onclick lsitener
+    //false when from onclick listener
     public void startNewService(ArrayList<Uri> videoUri, int position, boolean isFromIntent) {
+
+        if (videoUri.size() == 0) {
+
+            tvTemp.setVisibility(View.VISIBLE);
+            rvPlaylist.setVisibility(View.GONE);
+
+        } else {
+
+            tvTemp.setVisibility(View.GONE);
+            rvPlaylist.setVisibility(View.VISIBLE);
+        }
 
         if (serviceIntent != null) {
 
@@ -231,7 +240,6 @@ public class MainActivity extends AppCompatActivity {
 
         if (isFromIntent) {
             //send from preferncec //no use of position in this case
-            Log.d(TAG, "startNewService: from intent -> " + sharedPreference.getInt(Constants.CURRENT_PLAYING_VIDEO_NUMBER, -1));
             serviceIntent.putExtra("position", sharedPreference.getInt(Constants.CURRENT_PLAYING_VIDEO_NUMBER, -1));
         } else {
 
@@ -306,4 +314,50 @@ public class MainActivity extends AppCompatActivity {
         return false;
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        MenuInflater menuInflater = getMenuInflater();
+        menuInflater.inflate(R.menu.menu_main_activity, menu);
+
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        switch (item.getItemId()) {
+
+            case R.id.menuAdd:
+
+                askingPermissionForOverlayScreen();
+
+                Intent mediaChoser = new Intent();
+                mediaChoser.setAction(Intent.ACTION_GET_CONTENT);
+                mediaChoser.setType("video/*");
+
+                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN_MR2)
+                    mediaChoser.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+                else {
+                }
+
+                startActivityForResult(Intent.createChooser(mediaChoser, "Select Videos"), GET_VIDEO_URL_CODE);
+
+
+                break;
+
+            case R.id.menuRemove:
+
+
+                break;
+
+
+            case R.id.menuHelp:
+
+                break;
+        }
+
+
+        return super.onOptionsItemSelected(item);
+    }
 }

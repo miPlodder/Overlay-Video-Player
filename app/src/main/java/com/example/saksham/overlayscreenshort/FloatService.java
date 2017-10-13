@@ -31,7 +31,6 @@ public class FloatService extends Service implements View.OnClickListener {
     VideoView vvVideo;
     ArrayList<Uri> videoList;
     View view;
-    int prevVideoIndex = 0;
     WindowManager.LayoutParams wParams;
     boolean isFirstView = true;
     WindowManager.LayoutParams prevParams;
@@ -39,7 +38,7 @@ public class FloatService extends Service implements View.OnClickListener {
     GestureDetector gestureDetector;
     SharedPreferences sharedPreferences;
     SharedPreferences.Editor editor;
-    static int pauseTime = 0 ; //in milliseconds
+    static int pauseTime = 0; //in milliseconds
 
     public FloatService() {
 
@@ -123,6 +122,7 @@ public class FloatService extends Service implements View.OnClickListener {
                     int temp = ((sharedPreferences.getInt(Constants.CURRENT_PLAYING_VIDEO_NUMBER, -1) + 1) % videoList.size());
                     vvVideo.setVideoURI(videoList.get(temp));
 
+                    PlaylistAdapter.changeActiveItemBackground(sharedPreferences.getInt(Constants.CURRENT_PLAYING_VIDEO_NUMBER, -1), temp); //change background colour
                     editor.putInt(Constants.CURRENT_PLAYING_VIDEO_NUMBER, temp);
                     editor.commit();
 
@@ -204,7 +204,7 @@ public class FloatService extends Service implements View.OnClickListener {
         switch (v.getId()) {
 
             //closing the service on clicking "X"
-            //closing the service on clicking "X"
+
             case R.id.ibtnClose:
 
                 stopSelf();

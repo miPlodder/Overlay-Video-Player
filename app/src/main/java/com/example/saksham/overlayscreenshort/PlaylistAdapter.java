@@ -1,11 +1,11 @@
 package com.example.saksham.overlayscreenshort;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
+import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.net.Uri;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +13,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -27,6 +28,9 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
     ArrayList<Uri> videoUri;
     OnItemClickListener onItemClickListener;
     OnStartNewService onStartNewService;
+    SharedPreferences sharedPreferences;
+    SharedPreferences.Editor editor;
+    static ArrayList<PlaylistViewHolder> holderList;
 
     interface OnItemClickListener {
 
@@ -47,9 +51,11 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
         this.videoUri = videoUri;
         this.onStartNewService = onStartNewService;
         this.onItemClickListener = onItemClickListener;
+        sharedPreferences = context.getSharedPreferences(Constants.COMMON_SHARED_PREF, Context.MODE_PRIVATE);
+        editor = sharedPreferences.edit();
+        holderList = new ArrayList<>();
 
     }
-
 
     @Override
     public PlaylistViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -57,12 +63,19 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View view = inflater.inflate(R.layout.item_playlist_recycler_view, parent, false);
 
+        PlaylistViewHolder holder = new PlaylistViewHolder(view) ;
+        holderList.add(holder);
 
-        return new PlaylistViewHolder(view);
+        return holder;
     }
 
     @Override
     public void onBindViewHolder(final PlaylistViewHolder holder, final int position) {
+
+        if(sharedPreferences.getInt(Constants.CURRENT_PLAYING_VIDEO_NUMBER, -1) == 0){
+            Toast.makeText(context, "PlaylistAdapter", Toast.LENGTH_SHORT).show();
+            PlaylistAdapter.changeActiveItemBackground(-1,0);
+        }
 
         holder.tvVideoName.setText(items.get(position).getName());
         holder.ivThumbnail.setImageBitmap(items.get(position).getThumbnail());
@@ -71,9 +84,15 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
             @Override
             public void onClick(View v) {
 
+                if (position == videoUri.size()) {
+
+                }
+
+                //holderList.remove(position); //no need to remove element from recycler view
                 items.remove(position);
                 onStartNewService.onStartService(setVideoUri(), position);
                 notifyDataSetChanged();
+
             }
         });
 
@@ -96,7 +115,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
         ImageView ivThumbnail;
         TextView tvVideoName;
         ImageButton ibRemove;
-        LinearLayout llClicker;
+        LinearLayout llClicker, llItem;
 
         public PlaylistViewHolder(View itemView) {
             super(itemView);
@@ -105,6 +124,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
             tvVideoName = (TextView) itemView.findViewById(R.id.tvVideoName);
             ibRemove = (ImageButton) itemView.findViewById(R.id.ibRemove);
             llClicker = (LinearLayout) itemView.findViewById(R.id.llClicker);
+            llItem = (LinearLayout) itemView.findViewById(R.id.llItem);
 
         }
     }
@@ -120,5 +140,22 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
         }
 
         return videoUri;
+    }
+
+    public static void changeActiveItemBackground(int prevPosition, int currPosition) {
+
+        Log.d("Adapter size", "changeActiveItemBackground: " + holderList.size());
+        Log.d("HAHA", "prev -> " + prevPosition);
+        Log.d("HAHA", "curr: -> " + currPosition);
+
+        if (prevPosition != -1) {
+            Log.d("HAHA", "coloring prev");
+            holderList.get(prevPosition).llItem.setBackgroundColor(Color.WHITE);
+        }
+        if (currPosition != -1) {
+            Log.d("HAHA", "coloring current");
+            holderList.get(currPosition).llItem.setBackgroundColor(Color.argb(150, 100, 100, 100));
+        }
+
     }
 }
