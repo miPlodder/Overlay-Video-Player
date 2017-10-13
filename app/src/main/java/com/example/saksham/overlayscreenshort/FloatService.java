@@ -3,15 +3,12 @@ package com.example.saksham.overlayscreenshort;
 import android.app.Service;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.gesture.Gesture;
-import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.GestureDetector;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -42,6 +39,7 @@ public class FloatService extends Service implements View.OnClickListener {
     GestureDetector gestureDetector;
     SharedPreferences sharedPreferences;
     SharedPreferences.Editor editor;
+    static int pauseTime = 0 ; //in milliseconds
 
     public FloatService() {
 
@@ -60,10 +58,11 @@ public class FloatService extends Service implements View.OnClickListener {
         editor = sharedPreferences.edit();
 
         //storing 0 temporary in the shared preference
-        editor.putInt(Constants.CURRENT_VIDEO_SHARED_PREF, 0);
-        editor.commit();
+        /*editor.putInt(Constants.CURRENT_PLAYING_VIDEO_NUMBER, 0);
+        editor.commit();*/
 
         videoList = (ArrayList<Uri>) intent.getSerializableExtra("videoList");
+
         videoPosition = intent.getIntExtra("position", -1);
 
         windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
@@ -79,6 +78,22 @@ public class FloatService extends Service implements View.OnClickListener {
                 return super.onDoubleTap(e);
             }
 
+            @Override
+            public boolean onSingleTapConfirmed(MotionEvent e) {
+
+                if (vvVideo != null && vvVideo.isPlaying()) {
+
+                    pauseTime = vvVideo.getCurrentPosition();
+                    vvVideo.pause();
+                    Toast.makeText(FloatService.this, "Paused Video", Toast.LENGTH_SHORT).show();
+                } else if (vvVideo != null && !vvVideo.isPlaying()) {
+
+                    vvVideo.start();
+                    vvVideo.seekTo(pauseTime);
+                    Toast.makeText(FloatService.this, "Resumed Video", Toast.LENGTH_SHORT).show();
+                }
+                return super.onSingleTapConfirmed(e);
+            }
         });
     }
 
@@ -104,15 +119,17 @@ public class FloatService extends Service implements View.OnClickListener {
                 @Override
                 public void onCompletion(MediaPlayer mp) {
 
-                    prevVideoIndex++;
-                    int temp = ((prevVideoIndex) % videoList.size());
+                    //prevVideoIndex++;
+                    int temp = ((sharedPreferences.getInt(Constants.CURRENT_PLAYING_VIDEO_NUMBER, -1) + 1) % videoList.size());
                     vvVideo.setVideoURI(videoList.get(temp));
 
-                    editor.putInt(Constants.CURRENT_VIDEO_SHARED_PREF, temp);
+                    editor.putInt(Constants.CURRENT_PLAYING_VIDEO_NUMBER, temp);
                     editor.commit();
+
                     vvVideo.start();
                 }
             });
+
         } else {
 
             stopSelf();
@@ -186,6 +203,7 @@ public class FloatService extends Service implements View.OnClickListener {
 
         switch (v.getId()) {
 
+            //closing the service on clicking "X"
             //closing the service on clicking "X"
             case R.id.ibtnClose:
 

@@ -7,7 +7,7 @@ package com.example.saksham.overlayscreenshort;
 public class Constants {
 
     public static final String COMMON_SHARED_PREF = "hello dear";
-    public static final String CURRENT_VIDEO_SHARED_PREF = "key" ;
+    public static final String CURRENT_PLAYING_VIDEO_NUMBER = "key" ;
     public static final String CURRENT_X = "x-axis";
     public static final String CURRENT_Y = "y-axis";
 }

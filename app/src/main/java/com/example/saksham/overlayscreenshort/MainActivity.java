@@ -6,8 +6,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.media.MediaMetadataRetriever;
-import android.media.MediaPlayer;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Build;
@@ -15,10 +13,8 @@ import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.media.MediaMetadataCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -26,8 +22,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import org.w3c.dom.Text;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -61,7 +55,10 @@ public class MainActivity extends AppCompatActivity {
         //initialising the shared preference
         sharedPreference = getSharedPreferences(Constants.COMMON_SHARED_PREF, MODE_PRIVATE);
         editor = sharedPreference.edit();
+        Log.d(TAG, "editing: ");
 
+        //initialising the shared prefereence variable
+        editor.putInt(Constants.CURRENT_PLAYING_VIDEO_NUMBER, 0);
         editor.putInt(Constants.CURRENT_X, 0);
         editor.putInt(Constants.CURRENT_Y, 0);
 
@@ -73,7 +70,9 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void setOnItemClickListener(ArrayList<Uri> videoUri, int position) {
 
-                        startNewService(videoUri, position);
+                        editor.putInt(Constants.CURRENT_PLAYING_VIDEO_NUMBER, position);
+                        editor.commit();
+                        startNewService(videoUri, position, false);
 
                     }
                 },
@@ -82,17 +81,20 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onStartService(ArrayList<Uri> videoUri, int position) {
 
-                        currentVideoPosition = sharedPreference.getInt(Constants.CURRENT_VIDEO_SHARED_PREF, -1);
+                        Log.d(TAG, "onStartService: ->" + false);
+                        currentVideoPosition = sharedPreference.getInt(Constants.CURRENT_PLAYING_VIDEO_NUMBER, -1);
+                        Log.d(TAG, "onStartService: -> currentVideoPosition" + currentVideoPosition);
 
                         if (position == currentVideoPosition) {
 
+                            Log.d(TAG, "onStartService: -> equal" + position);
                             //from here service will be started when item from recycler view is deleted
                             if (position < videoUri.size()) {
 
-                                startNewService(videoUri, position);
+                                startNewService(videoUri, position, false);
                             } else {
 
-                                startNewService(videoUri, 0);
+                                startNewService(videoUri, 0, false);
 
                             }
                         } else if (position == -1) {
@@ -101,11 +103,12 @@ public class MainActivity extends AppCompatActivity {
 
                         } else {
 
-                            startNewService(videoUri, currentVideoPosition);
+                            startNewService(videoUri, currentVideoPosition, false);
 
                         }
                     }
                 });
+
         rvPlaylist.setAdapter(playlistAdapter);
         rvPlaylist.setLayoutManager(new LinearLayoutManager(this));
 
@@ -121,8 +124,8 @@ public class MainActivity extends AppCompatActivity {
 
                 if (Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN_MR2)
                     mediaChoser.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-                else
-                {}
+                else {
+                }
 
                 startActivityForResult(Intent.createChooser(mediaChoser, "Select Videos"), GET_VIDEO_URL_CODE);
 
@@ -189,7 +192,7 @@ public class MainActivity extends AppCompatActivity {
                             ClipData.Item item = mClipData.getItemAt(i);
                             Uri uri = item.getUri();
                             if (isItemPresent(uri)) {
-                                Log.d(TAG, "onActivityResult: do nothing");
+                                //do nothing
                             } else {
                                 videoUri.add(uri);
                                 playlist.add(new PlaylistPOJO(this.pathToNameConvertor(uri.toString()),
@@ -204,16 +207,16 @@ public class MainActivity extends AppCompatActivity {
                     playlistAdapter.notifyDataSetChanged();
 
                     //from here service will be called when videos are selected from the gallery
-                    this.startNewService(videoUri, 0);
-
-                    Log.d(TAG, "videouri from mainactivty" + videoUri.size());
+                    this.startNewService(videoUri, sharedPreference.getInt(Constants.CURRENT_PLAYING_VIDEO_NUMBER, -1), true);
                     break;
                 }
         }
     }
 
     //position - the video which has to be played from the playlist
-    public void startNewService(ArrayList<Uri> videoUri, int position) {
+    //isFromIntent -> true when from intent
+    //false when from onclick lsitener
+    public void startNewService(ArrayList<Uri> videoUri, int position, boolean isFromIntent) {
 
         if (serviceIntent != null) {
 
@@ -225,7 +228,17 @@ public class MainActivity extends AppCompatActivity {
         );
 
         serviceIntent.putExtra("videoList", videoUri);
-        serviceIntent.putExtra("position", position);
+
+        if (isFromIntent) {
+            //send from preferncec //no use of position in this case
+            Log.d(TAG, "startNewService: from intent -> " + sharedPreference.getInt(Constants.CURRENT_PLAYING_VIDEO_NUMBER, -1));
+            serviceIntent.putExtra("position", sharedPreference.getInt(Constants.CURRENT_PLAYING_VIDEO_NUMBER, -1));
+        } else {
+
+            Log.d(TAG, "startNewService: from click -> position = " + position + ", sharedpref = " + sharedPreference.getInt(Constants.CURRENT_PLAYING_VIDEO_NUMBER, -1));
+            serviceIntent.putExtra("position", position);
+        }
+
         startService(serviceIntent);
 
     }
