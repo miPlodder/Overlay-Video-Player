@@ -17,6 +17,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.ListViewCompat;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
@@ -24,6 +25,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -47,11 +49,13 @@ public class MainActivity extends AppCompatActivity {
     int currentVideoPosition;
     LinearLayoutManager linearLayoutManager;
 
+
     public void initialise() {
 
         getSupportActionBar().setTitle("Playlist");
 
         rvPlaylist = (RecyclerView) findViewById(R.id.rvPlaylist);
+
         tvTemp = (TextView) findViewById(R.id.tvTemp);
 
         videoUri = new ArrayList<>();
@@ -73,15 +77,18 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void setOnItemClickListener(ArrayList<Uri> videoUri, int position) {
 
-                        Toast.makeText(MainActivity.this, "clicking", Toast.LENGTH_SHORT).show();
-                        PlaylistAdapter.changeActiveItemBackground(sharedPreference.getInt(Constants.CURRENT_PLAYING_VIDEO_NUMBER, -1), position);
+                        //changing the background color
+                        PlaylistAdapter.changeActiveItemBackground(position);
+
                         editor.putInt(Constants.CURRENT_PLAYING_VIDEO_NUMBER, position);
                         editor.commit();
+
                         startNewService(videoUri, position, false);
 
                     }
                 },
 
+                //close
                 new PlaylistAdapter.OnStartNewService() {
 
                     @Override
@@ -98,27 +105,29 @@ public class MainActivity extends AppCompatActivity {
                                 editor.putInt(Constants.CURRENT_PLAYING_VIDEO_NUMBER, 0);
                                 editor.commit();
 
-
                                 startNewService(videoUri, 0, false);
-                                PlaylistAdapter.changeActiveItemBackground(currentVideoPosition, 0);
+                                PlaylistAdapter.changeActiveItemBackground(0);
 
                             } else {
 
                                 startNewService(videoUri, position, false);
-                                PlaylistAdapter.changeActiveItemBackground(currentVideoPosition, position);
+                                PlaylistAdapter.changeActiveItemBackground(position);
                             }
 
+                            //pending
                         } else if (position < currentVideoPosition) {
 
                             editor.putInt(Constants.CURRENT_PLAYING_VIDEO_NUMBER, currentVideoPosition - 1);
                             editor.commit();
+
+                            //which video to play
                             startNewService(videoUri, currentVideoPosition - 1, false);
-                            PlaylistAdapter.changeActiveItemBackground(currentVideoPosition, currentVideoPosition - 1);
+                            PlaylistAdapter.changeActiveItemBackground(currentVideoPosition - 1);
 
                         } else if (position > currentVideoPosition) {
 
                             startNewService(videoUri, currentVideoPosition, false);
-                            PlaylistAdapter.changeActiveItemBackground(currentVideoPosition, currentVideoPosition);
+                            PlaylistAdapter.changeActiveItemBackground(currentVideoPosition);
                         }
                     }
                 });
@@ -126,8 +135,27 @@ public class MainActivity extends AppCompatActivity {
         rvPlaylist.setAdapter(playlistAdapter);
 
         linearLayoutManager = new LinearLayoutManager(this);
-        rvPlaylist.setLayoutManager(new GridLayoutManager(this, 2));
+        //linearLayoutManager.scrollToPosition(videoUri.size() - 1);
+        //linearLayoutManager.smoothScrollToPosition(rvPlaylist, null, videoUri.size() - 1);
+        //rvPlaylist.setOverScrollMode(View.OVER_SCROLL_ALWAYS);
 
+        //rvPlaylist.setLayoutManager(new GridLayoutManager(this, 2));
+        rvPlaylist.setLayoutManager(linearLayoutManager);
+        rvPlaylist.setItemViewCacheSize(20);
+        rvPlaylist.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+
+            }
+
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                PlaylistAdapter.changeActiveItemBackground(sharedPreference.getInt(Constants.CURRENT_PLAYING_VIDEO_NUMBER, -1));
+            }
+        });
+        //rvPlaylist.setNestedScrollingEnabled(true);
     }
 
     @Override
@@ -199,8 +227,7 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
 
-                    linearLayoutManager.scrollToPosition(videoUri.size() - 1);
-                    rvPlaylist.setOverScrollMode(View.OVER_SCROLL_ALWAYS);
+
 
                     playlistAdapter.notifyDataSetChanged();
 
@@ -296,6 +323,7 @@ public class MainActivity extends AppCompatActivity {
         rv = rv.replaceAll("%5B", "[");
         rv = rv.replaceAll("%5D", "]");
         rv = rv.replaceAll("%20", " ");
+        rv = rv.replace(".mp4","");
 
         return rv;
     }
@@ -348,7 +376,7 @@ public class MainActivity extends AppCompatActivity {
 
             case R.id.menuRemove:
 
-
+                clearPlaylist();
                 break;
 
 
@@ -359,5 +387,19 @@ public class MainActivity extends AppCompatActivity {
 
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public void clearPlaylist() {
+
+        //shared pref, videoUri, playlist pojo clean
+        editor.putInt(Constants.CURRENT_PLAYING_VIDEO_NUMBER, 0);
+        editor.commit();
+
+        videoUri.clear();
+        startNewService(videoUri, 0, false);
+
+        playlist.clear();
+        playlistAdapter.notifyDataSetChanged();
+
     }
 }

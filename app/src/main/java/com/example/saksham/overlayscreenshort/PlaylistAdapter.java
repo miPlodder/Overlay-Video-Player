@@ -23,6 +23,7 @@ import java.util.ArrayList;
 
 public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.PlaylistViewHolder> {
 
+    int previousPosition;
     ArrayList<PlaylistPOJO> items;
     Context context;
     ArrayList<Uri> videoUri;
@@ -63,7 +64,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View view = inflater.inflate(R.layout.item_playlist_recycler_view, parent, false);
 
-        PlaylistViewHolder holder = new PlaylistViewHolder(view) ;
+        PlaylistViewHolder holder = new PlaylistViewHolder(view);
         holderList.add(holder);
 
         return holder;
@@ -72,13 +73,23 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
     @Override
     public void onBindViewHolder(final PlaylistViewHolder holder, final int position) {
 
-        if(sharedPreferences.getInt(Constants.CURRENT_PLAYING_VIDEO_NUMBER, -1) == 0){
-            Toast.makeText(context, "PlaylistAdapter", Toast.LENGTH_SHORT).show();
-            PlaylistAdapter.changeActiveItemBackground(-1,0);
+        if (sharedPreferences.getInt(Constants.CURRENT_PLAYING_VIDEO_NUMBER, -1) == 0) {
+
+            PlaylistAdapter.changeActiveItemBackground(0);
         }
 
         holder.tvVideoName.setText(items.get(position).getName());
-        holder.ivThumbnail.setImageBitmap(items.get(position).getThumbnail());
+
+        if(items.get(position).getThumbnail() == null){
+
+            holder.ivThumbnail.setImageResource(R.drawable.inf);
+
+        }else{
+
+            holder.ivThumbnail.setImageBitmap(items.get(position).getThumbnail());
+        }
+
+        holder.tvHolderId.setText("position =" + position);
 
         holder.ibRemove.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -113,7 +124,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
     public class PlaylistViewHolder extends RecyclerView.ViewHolder {
 
         ImageView ivThumbnail;
-        TextView tvVideoName;
+        TextView tvVideoName, tvHolderId;
         ImageButton ibRemove;
         LinearLayout llClicker, llItem;
 
@@ -125,6 +136,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
             ibRemove = (ImageButton) itemView.findViewById(R.id.ibRemove);
             llClicker = (LinearLayout) itemView.findViewById(R.id.llClicker);
             llItem = (LinearLayout) itemView.findViewById(R.id.llItem);
+            tvHolderId = (TextView) itemView.findViewById(R.id.tvHolderId);
 
         }
     }
@@ -142,19 +154,24 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
         return videoUri;
     }
 
-    public static void changeActiveItemBackground(int prevPosition, int currPosition) {
+    public static void changeActiveItemBackground(int currPosition) {
 
-        Log.d("Adapter size", "changeActiveItemBackground: " + holderList.size());
-        Log.d("HAHA", "prev -> " + prevPosition);
-        Log.d("HAHA", "curr: -> " + currPosition);
 
-        if (prevPosition != -1) {
-            Log.d("HAHA", "coloring prev");
+
+
+        /*if (prevPosition != -1) {
             holderList.get(prevPosition).llItem.setBackgroundColor(Color.WHITE);
         }
-        if (currPosition != -1) {
-            Log.d("HAHA", "coloring current");
+        */
+        for(int i = 0 ; i < holderList.size() ; i++){
+
+            holderList.get(i).llItem.setBackgroundColor(Color.WHITE);
+
+        }
+
+        if (holderList.size() > currPosition && currPosition != -1) {
             holderList.get(currPosition).llItem.setBackgroundColor(Color.argb(150, 100, 100, 100));
+            Log.d("HAHA", "Holder Size " + currPosition);
         }
 
     }

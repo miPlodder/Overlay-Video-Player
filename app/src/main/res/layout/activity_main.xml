@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#605FFF"
     android:orientation="vertical"
     tools:context="com.example.saksham.overlayscreenshort.MainActivity">
 
@@ -15,11 +16,11 @@
         android:text="No Playlist Selected"
         android:textSize="20sp" />
 
-    <android.support.v7.widget.RecyclerView
+        <android.support.v7.widget.RecyclerView
 
-        android:id="@+id/rvPlaylist"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="gone" />
+            android:id="@+id/rvPlaylist"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone" />
 
 </LinearLayout>
