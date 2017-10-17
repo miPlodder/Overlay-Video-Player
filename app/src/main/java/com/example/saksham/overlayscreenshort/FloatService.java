@@ -102,11 +102,10 @@ public class FloatService extends Service implements View.OnClickListener {
         this.initialise(intent);
         this.addVideoToVideoView();
         this.addWindowManager();
-        //String stringURI = "android.resource://com.example.saksham.overlayscreenshort/" + R.raw.video;
-
         return START_STICKY;
     }
 
+    //adding video to videoplayer
     public void addVideoToVideoView() {
 
         if (videoList.size() != 0) {
@@ -231,6 +230,7 @@ public class FloatService extends Service implements View.OnClickListener {
     public void onDestroy() {
         super.onDestroy();
         Log.d(TAG, "onDestroy: inside service");
+
         windowManager.removeView(view);
     }
 

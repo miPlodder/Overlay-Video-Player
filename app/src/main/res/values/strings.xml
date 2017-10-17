@@ -1,3 +1,10 @@
 <resources>
-    <string name="app_name">OverlayScreenshort</string>
+    <string name="app_name">uVideoPlayer</string>
+    <string name="help">Read the below guidelines, to know more about how the functionalities of the app,</string>
+    <string name="help_1"><i><b>Grant Overlay and Read Storage Permission</b> so that Video Player can run on screen, along with other apps.</i></string>
+    <string name="help_2"><i><b>Tap</b> on the Video Player, to <b>PLAY/PAUSE</b> the video.</i></string>
+    <string name="help_3"><i><b>Double tap</b> on the Video Player to open the Playlist.</i></string>
+    <string name="help_4"><i><b>Clear</b> whole Playlist from the menu.</i></string>
+
+
 </resources>

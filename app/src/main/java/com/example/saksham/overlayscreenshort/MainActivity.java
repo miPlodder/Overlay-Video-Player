@@ -40,15 +40,17 @@ public class MainActivity extends AppCompatActivity {
     public static final int STORAGE_CODE = 34;
     Intent serviceIntent;
     RecyclerView rvPlaylist;
+
+    //used by recycler view
     ArrayList<PlaylistPOJO> playlist;
+    //used by service
     ArrayList<Uri> videoUri;
+
     PlaylistAdapter playlistAdapter;
     TextView tvTemp;
     SharedPreferences sharedPreference;
     SharedPreferences.Editor editor;
     int currentVideoPosition;
-    LinearLayoutManager linearLayoutManager;
-
 
     public void initialise() {
 
@@ -133,14 +135,7 @@ public class MainActivity extends AppCompatActivity {
                 });
 
         rvPlaylist.setAdapter(playlistAdapter);
-
-        linearLayoutManager = new LinearLayoutManager(this);
-        //linearLayoutManager.scrollToPosition(videoUri.size() - 1);
-        //linearLayoutManager.smoothScrollToPosition(rvPlaylist, null, videoUri.size() - 1);
-        //rvPlaylist.setOverScrollMode(View.OVER_SCROLL_ALWAYS);
-
-        //rvPlaylist.setLayoutManager(new GridLayoutManager(this, 2));
-        rvPlaylist.setLayoutManager(linearLayoutManager);
+        rvPlaylist.setLayoutManager(new GridLayoutManager(this, 2));
         rvPlaylist.setItemViewCacheSize(20);
         rvPlaylist.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
@@ -155,7 +150,7 @@ public class MainActivity extends AppCompatActivity {
                 PlaylistAdapter.changeActiveItemBackground(sharedPreference.getInt(Constants.CURRENT_PLAYING_VIDEO_NUMBER, -1));
             }
         });
-        //rvPlaylist.setNestedScrollingEnabled(true);
+
     }
 
     @Override
@@ -200,7 +195,6 @@ public class MainActivity extends AppCompatActivity {
         switch (requestCode) {
 
             case OVERLAY_CODE:
-
                 break;
 
             case GET_VIDEO_URL_CODE:
@@ -208,7 +202,7 @@ public class MainActivity extends AppCompatActivity {
                 if (data != null) {
 
                     if (data.getData() != null) {
-                        Log.d(TAG, "data " + data.getData());
+
                     } else {
                         //hack for mi, i guess to get external storage video link
                         ClipData mClipData = data.getClipData();
@@ -228,11 +222,14 @@ public class MainActivity extends AppCompatActivity {
                     }
 
 
-
                     playlistAdapter.notifyDataSetChanged();
 
                     //from here service will be called when videos are selected from the gallery
+
+
                     this.startNewService(videoUri, sharedPreference.getInt(Constants.CURRENT_PLAYING_VIDEO_NUMBER, -1), true);
+
+
                     break;
                 }
         }
@@ -252,29 +249,31 @@ public class MainActivity extends AppCompatActivity {
 
             tvTemp.setVisibility(View.GONE);
             rvPlaylist.setVisibility(View.VISIBLE);
+
+            if (serviceIntent != null) {
+
+                stopService(serviceIntent);
+            }
+            serviceIntent = new Intent(
+                    MainActivity.this,
+                    FloatService.class
+            );
+
+            serviceIntent.putExtra("videoList", videoUri);
+
+            if (isFromIntent) {
+                //send from preferncec //no use of position in this case
+                serviceIntent.putExtra("position", sharedPreference.getInt(Constants.CURRENT_PLAYING_VIDEO_NUMBER, -1));
+            } else {
+
+                Log.d(TAG, "startNewService: from click -> position = " + position + ", sharedpref = " + sharedPreference.getInt(Constants.CURRENT_PLAYING_VIDEO_NUMBER, -1));
+                serviceIntent.putExtra("position", position);
+            }
+
+            startService(serviceIntent);
+
         }
 
-        if (serviceIntent != null) {
-
-            stopService(serviceIntent);
-        }
-        serviceIntent = new Intent(
-                MainActivity.this,
-                FloatService.class
-        );
-
-        serviceIntent.putExtra("videoList", videoUri);
-
-        if (isFromIntent) {
-            //send from preferncec //no use of position in this case
-            serviceIntent.putExtra("position", sharedPreference.getInt(Constants.CURRENT_PLAYING_VIDEO_NUMBER, -1));
-        } else {
-
-            Log.d(TAG, "startNewService: from click -> position = " + position + ", sharedpref = " + sharedPreference.getInt(Constants.CURRENT_PLAYING_VIDEO_NUMBER, -1));
-            serviceIntent.putExtra("position", position);
-        }
-
-        startService(serviceIntent);
 
     }
 
@@ -286,9 +285,14 @@ public class MainActivity extends AppCompatActivity {
 
             case STORAGE_CODE:
 
-                if (grantResults[0] == PackageManager.PERMISSION_GRANTED)
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    editor.putBoolean(Constants.PERMISSION_CHECK, true);
+                    editor.commit();
+
                     Toast.makeText(this, "Storage Permission Granted", Toast.LENGTH_SHORT).show();
-                else {
+
+                } else {
                     Toast.makeText(this, "Storage Permission Denied", Toast.LENGTH_SHORT).show();
                 }
 
@@ -323,7 +327,7 @@ public class MainActivity extends AppCompatActivity {
         rv = rv.replaceAll("%5B", "[");
         rv = rv.replaceAll("%5D", "]");
         rv = rv.replaceAll("%20", " ");
-        rv = rv.replace(".mp4","");
+        rv = rv.replace(".mp4", "");
 
         return rv;
     }
@@ -359,6 +363,7 @@ public class MainActivity extends AppCompatActivity {
             case R.id.menuAdd:
 
                 askingPermissionForOverlayScreen();
+                askingStoragePermission();
 
                 Intent mediaChoser = new Intent();
                 mediaChoser.setAction(Intent.ACTION_GET_CONTENT);
@@ -369,19 +374,23 @@ public class MainActivity extends AppCompatActivity {
                 else {
                 }
 
-                startActivityForResult(Intent.createChooser(mediaChoser, "Select Videos"), GET_VIDEO_URL_CODE);
+                if (sharedPreference.getBoolean(Constants.PERMISSION_CHECK, false)) {
 
+                    startActivityForResult(Intent.createChooser(mediaChoser, "Select Videos"), GET_VIDEO_URL_CODE);
+                }
 
                 break;
 
             case R.id.menuRemove:
 
+                Toast.makeText(this, "Playlist Removed", Toast.LENGTH_SHORT).show();
                 clearPlaylist();
                 break;
 
 
             case R.id.menuHelp:
 
+                startActivity(new Intent(this, HelpActivity.class));
                 break;
         }
 
