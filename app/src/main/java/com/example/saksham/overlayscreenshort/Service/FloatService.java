@@ -143,6 +143,8 @@ public class FloatService extends Service implements View.OnClickListener {
 
     public void addWindowManager() {
 
+
+        
         wParams = new WindowManager.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.TYPE_PHONE, WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, PixelFormat.TRANSLUCENT);
         wParams.x = sharedPreferences.getInt(Constants.CURRENT_X, -1);
         wParams.y = sharedPreferences.getInt(Constants.CURRENT_Y, -1);
