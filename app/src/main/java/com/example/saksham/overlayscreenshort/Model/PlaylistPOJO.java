@@ -1,4 +1,4 @@
-package com.example.saksham.overlayscreenshort;
+package com.example.saksham.overlayscreenshort.Model;
 
 import android.graphics.Bitmap;
 import android.net.Uri;

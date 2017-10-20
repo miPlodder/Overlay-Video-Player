@@ -14,16 +14,16 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".MainActivity"
+            android:name=".View.Activity.MainActivity"
             android:launchMode="singleTask"></activity>
 
         <service
-            android:name=".FloatService"
+            android:name=".Service.FloatService"
             android:enabled="true"
             android:exported="true" />
 
         <activity
-            android:name=".SplashActivity"
+            android:name=".View.Activity.SplashActivity"
             android:theme="@style/NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -31,7 +31,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".HelpActivity"></activity>
+        <activity android:name=".View.Activity.HelpActivity"></activity>
     </application>
 
 </manifest>

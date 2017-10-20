@@ -1,12 +1,13 @@
-package com.example.saksham.overlayscreenshort;
+package com.example.saksham.overlayscreenshort.View.Activity;
 
 import android.content.Intent;
 import android.os.CountDownTimer;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+
+import com.example.saksham.overlayscreenshort.R;
 
 public class SplashActivity extends AppCompatActivity {
 

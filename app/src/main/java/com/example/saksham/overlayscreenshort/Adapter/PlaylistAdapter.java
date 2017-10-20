@@ -1,4 +1,4 @@
-package com.example.saksham.overlayscreenshort;
+package com.example.saksham.overlayscreenshort.Adapter;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -13,7 +13,10 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
+
+import com.example.saksham.overlayscreenshort.Helper.Constants;
+import com.example.saksham.overlayscreenshort.Model.PlaylistPOJO;
+import com.example.saksham.overlayscreenshort.R;
 
 import java.util.ArrayList;
 
@@ -33,13 +36,13 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
     SharedPreferences.Editor editor;
     static ArrayList<PlaylistViewHolder> holderList;
 
-    interface OnItemClickListener {
+    public interface OnItemClickListener {
 
         void setOnItemClickListener(ArrayList<Uri> videoUri, int position);
 
     }
 
-    interface OnStartNewService {
+    public interface OnStartNewService {
 
         void onStartService(ArrayList<Uri> videoUri, int position);
     }

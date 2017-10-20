@@ -1,4 +1,4 @@
-package com.example.saksham.overlayscreenshort;
+package com.example.saksham.overlayscreenshort.View.Activity;
 
 import android.Manifest;
 import android.content.ClipData;
@@ -16,18 +16,20 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.ListViewCompat;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.example.saksham.overlayscreenshort.Helper.Constants;
+import com.example.saksham.overlayscreenshort.Service.FloatService;
+import com.example.saksham.overlayscreenshort.Adapter.PlaylistAdapter;
+import com.example.saksham.overlayscreenshort.Model.PlaylistPOJO;
+import com.example.saksham.overlayscreenshort.R;
 
 import java.io.File;
 import java.util.ArrayList;
