@@ -82,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
                     public void setOnItemClickListener(ArrayList<Uri> videoUri, int position) {
 
                         //changing the background color
-                        PlaylistAdapter.changeActiveItemBackground(position);
+                        //PlaylistAdapter.changeActiveItemBackground(position);
 
                         editor.putInt(Constants.CURRENT_PLAYING_VIDEO_NUMBER, position);
                         editor.commit();
@@ -110,12 +110,12 @@ public class MainActivity extends AppCompatActivity {
                                 editor.commit();
 
                                 startNewService(videoUri, 0, false);
-                                PlaylistAdapter.changeActiveItemBackground(0);
+                                //PlaylistAdapter.changeActiveItemBackground(0);
 
                             } else {
 
                                 startNewService(videoUri, position, false);
-                                PlaylistAdapter.changeActiveItemBackground(position);
+                                //PlaylistAdapter.changeActiveItemBackground(position);
                             }
 
                             //pending
@@ -126,12 +126,12 @@ public class MainActivity extends AppCompatActivity {
 
                             //which video to play
                             startNewService(videoUri, currentVideoPosition - 1, false);
-                            PlaylistAdapter.changeActiveItemBackground(currentVideoPosition - 1);
+                            //PlaylistAdapter.changeActiveItemBackground(currentVideoPosition - 1);
 
                         } else if (position > currentVideoPosition) {
 
                             startNewService(videoUri, currentVideoPosition, false);
-                            PlaylistAdapter.changeActiveItemBackground(currentVideoPosition);
+                            //PlaylistAdapter.changeActiveItemBackground(currentVideoPosition);
                         }
                     }
                 });
@@ -149,7 +149,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
-                PlaylistAdapter.changeActiveItemBackground(sharedPreference.getInt(Constants.CURRENT_PLAYING_VIDEO_NUMBER, -1));
+                //PlaylistAdapter.changeActiveItemBackground(sharedPreference.getInt(Constants.CURRENT_PLAYING_VIDEO_NUMBER, -1));
             }
         });
 

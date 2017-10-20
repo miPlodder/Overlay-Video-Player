@@ -35,6 +35,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
     SharedPreferences sharedPreferences;
     SharedPreferences.Editor editor;
     static ArrayList<PlaylistViewHolder> holderList;
+    public static final String TAG = "PlaylistAdapter";
 
     public interface OnItemClickListener {
 
@@ -69,6 +70,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
 
         PlaylistViewHolder holder = new PlaylistViewHolder(view);
         holderList.add(holder);
+        Log.d(TAG, "onCreateViewHolder: creating new view");
 
         return holder;
     }
@@ -76,10 +78,10 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
     @Override
     public void onBindViewHolder(final PlaylistViewHolder holder, final int position) {
 
-        if (sharedPreferences.getInt(Constants.CURRENT_PLAYING_VIDEO_NUMBER, -1) == 0) {
+        /*if (sharedPreferences.getInt(Constants.CURRENT_PLAYING_VIDEO_NUMBER, -1) == 0) {
 
             PlaylistAdapter.changeActiveItemBackground(0);
-        }
+        }*/
 
         holder.tvVideoName.setText(items.get(position).getName());
 
@@ -157,15 +159,15 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
         return videoUri;
     }
 
-    public static void changeActiveItemBackground(int currPosition) {
+    /*public static void changeActiveItemBackground(int currPosition) {
 
 
 
 
-        /*if (prevPosition != -1) {
+        *//*if (prevPosition != -1) {
             holderList.get(prevPosition).llItem.setBackgroundColor(Color.WHITE);
         }
-        */
+        *//*
         for(int i = 0 ; i < holderList.size() ; i++){
 
             holderList.get(i).llItem.setBackgroundColor(Color.WHITE);
@@ -174,8 +176,8 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
 
         if (holderList.size() > currPosition && currPosition != -1) {
             holderList.get(currPosition).llItem.setBackgroundColor(Color.argb(150, 100, 100, 100));
-            Log.d("HAHA", "Holder Size " + currPosition);
+            Log.d(TAG, "Holder Size " + currPosition +", size - "+holderList.size());
         }
 
-    }
+    }*/
 }

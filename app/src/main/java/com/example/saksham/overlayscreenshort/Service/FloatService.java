@@ -25,6 +25,7 @@ import com.example.saksham.overlayscreenshort.R;
 import com.example.saksham.overlayscreenshort.View.Activity.MainActivity;
 
 import java.util.ArrayList;
+import java.util.Stack;
 
 public class FloatService extends Service implements View.OnClickListener {
 
@@ -108,6 +109,7 @@ public class FloatService extends Service implements View.OnClickListener {
         this.addVideoToVideoView();
         this.addWindowManager();
         return START_STICKY;
+
     }
 
     //adding video to videoplayer
@@ -126,7 +128,7 @@ public class FloatService extends Service implements View.OnClickListener {
                     int temp = ((sharedPreferences.getInt(Constants.CURRENT_PLAYING_VIDEO_NUMBER, -1) + 1) % videoList.size());
                     vvVideo.setVideoURI(videoList.get(temp));
 
-                    PlaylistAdapter.changeActiveItemBackground(temp); //change background colour
+                    /*PlaylistAdapter.changeActiveItemBackground(temp); //change background colour*/
                     editor.putInt(Constants.CURRENT_PLAYING_VIDEO_NUMBER, temp);
                     editor.commit();
 
@@ -144,7 +146,7 @@ public class FloatService extends Service implements View.OnClickListener {
     public void addWindowManager() {
 
 
-        
+
         wParams = new WindowManager.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.TYPE_PHONE, WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, PixelFormat.TRANSLUCENT);
         wParams.x = sharedPreferences.getInt(Constants.CURRENT_X, -1);
         wParams.y = sharedPreferences.getInt(Constants.CURRENT_Y, -1);
